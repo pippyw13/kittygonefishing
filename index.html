@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fishing for Kool Kats</title>
+    <style>
+        body {
+            font-family: monospace;
+            text-align: center;
+            background: #e9adeb;
+            padding: 20px;
+        }
+        #game {
+            margin: 0 auto;
+            padding: 20px;
+            border: 3px dashed #00796b;
+            max-width: 600px;
+            background: white;
+        }
+        button {
+            background: #4fc3f7;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-family: monospace;
+        }
+        #output {
+            min-height: 50px;
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid #00796b;
+        }
+    </style>
+</head>
+<body>
+    <div id="game">
+        <pre>
+     /\_/\          ><((((º> 
+    ( o.o )   FISH FOR KOOL KATS
+     ( > )    <º))))><
+      " " 
+        </pre>
+        <div>
+            <p>Money: $<span id="money-display">100</span></p>
+            <p>Inventory: <span id="inventory-count">0</span> items</p>
+        </div>
+        <div id="output"></div>
+        <button id="fish-btn">Cast Line!</button>
+        <button id="shop-btn">Shop</button>
+        <button id="inventory-btn">Inventory</button>
+        <button id="reset-btn">Reset Game</button>
+    </div>
+
+    <script>
+
+        // Game Data
+        const fishData = {
+            "Pufferfish": "rare", 
+            "Mermaid's Hair": "legendary",
+            "Anglerfish": "rare",
+            "Clownfish": "common",
+            "Swordfish": "rare",
+            "Guppy": "common",
+            "Goldfish": "common",
+            "Salmon": "uncommon",
+            "Tuna": "rare",
+            "Trout": "uncommon",
+            "Catfish": "common",
+            "Bass": "uncommon",
+            "Piranha": "rare",
+            "Barracuda": "uncommon",
+            "Shark": "legendary",
+            "Mahi Mahi": "rare",
+            "Snapper": "common",
+            "Halibut": "uncommon",
+            "Perch": "common",
+            "Bluegill": "common",
+            "Tilapia": "uncommon",
+            "Sturgeon": "rare",
+            "Cod": "common",
+            "Flounder": "common",
+            "Mackerel": "uncommon",
+            "Grouper": "uncommon",
+            "Walleye": "rare",
+            "Carp": "common",
+            "Eel": "uncommon",
+            "Pike": "uncommon",
+            "Kingfish": "rare",
+            "Swordtail": "common",
+            "Zebra Fish": "common",
+            "Betta": "common",
+            "Koi": "uncommon",
+            "Angelfish": "uncommon",
+            "Jellyfish": "rare",
+            "Lionfish": "rare",
+            "Seahorse": "uncommon",
+            "Starfish": "common",
+            "Largemouth Bass": "uncommon",
+            "Smallmouth Bass": "uncommon",
+            "Rainbow Trout": "rare",
+            "Channel Catfish": "uncommon",
+            "Flathead Catfish": "uncommon",
+            "Yellowtail": "rare",
+            "Red Snapper": "uncommon",
+            "Rockfish": "uncommon",
+            "Sardine": "common",
+            "Anchovy": "common",
+            "Goby": "common",
+            "Booby Fish": "rare",
+            "Arowana": "legendary",
+            "Arapaima": "legendary",
+            "Tetra": "common",
+            "Bream": "common",
+            "Garfish": "uncommon",
+            "Mudfish": "uncommon",
+            "Shad": "common",
+            "Pompano": "rare",
+            "Bluefin Tuna": "legendary",
+            "Giant Squid": "legendary",
+            "Kelp Bass": "uncommon",
+            "Caribbean Reef Fish": "rare",
+            "Vampire Fish": "legendary",
+            "Moonfish": "rare",
+            "Fangtooth": "rare",
+            "Electric Eel": "rare",
+            "Butterfly Fish": "uncommon",
+            "Whale Shark": "legendary",
+            "Angel Shark": "rare",
+            "Goblin Shark": "rare",
+            "Spiny Lobster": "uncommon",
+            "Tigerfish": "rare",
+            "Chub": "common",
+            "Bassa Fish": "uncommon",
+            "Cobia": "rare",
+            "Lumpfish": "common",
+            "Cusk": "uncommon",
+            "Coral Trout": "rare",
+            "Codling": "common",
+            "Stonefish": "rare",
+            "Cuttlefish": "uncommon",
+            "Greenhouse Fish": "uncommon",
+            "Gold-Dust Molly": "common",
+            "Siamese Fighting Fish": "common",
+            "Jellyfish": "rare",
+            "Sea Bass": "uncommon",
+            "Whitefish": "common",
+            "Snapper": "common",
+            "Ocean Sunfish": "rare",
+            "Blue Marlin": "legendary",
+            "Largemouth Bass": "uncommon",
+            "Mullet": "common",
+            "Mudskipper": "uncommon",
+            "Whiting": "common",
+            "Triggerfish": "rare",
+            "Spotted Trout": "uncommon",
+            "Rainbow Fish": "uncommon",
+            "Blackfish": "uncommon",
+            "Dorado": "rare",
+            "Blowfish": "uncommon",
+            "bass": "exotic"
+        };
+        
+        const rarityWeights = {
+            "common": 0.6, 
+            "uncommon": 0.3, 
+            "rare": 0.08, 
+            "legendary": 0.02,
+            "exotic": 0.000001
+        };
+
+        // Game State
+        let inventory = [];
+        let money = 100;
+
+        // DOM Elements
+        const outputEl = document.getElementById("output");
+        const moneyEl = document.getElementById("money-display");
+        const inventoryCountEl = document.getElementById("inventory-count");
+
+        // Initialize Game
+        document.addEventListener("DOMContentLoaded", () => {
+            loadGame();
+            updateUI();
+            
+            // Button Event Listeners
+            document.getElementById("fish-btn").addEventListener("click", fish);
+            document.getElementById("shop-btn").addEventListener("click", shop);
+            document.getElementById("inventory-btn").addEventListener("click", showInventory);
+            document.getElementById("reset-btn").addEventListener("click", resetGame);
+        });
+
+        // Core Game Functions
+        function fish() {
+            
+            const rarity = weightedRandom(rarityWeights);
+            const eligibleFish = Object.keys(fishData).filter(fish => fishData[fish] === rarity);
+            const caughtFish = eligibleFish[Math.floor(Math.random() * eligibleFish.length)];
+            
+            inventory.push(caughtFish);
+            outputEl.innerHTML = `🎣 You caught a <strong>${caughtFish}</strong> (${rarity})!`;
+            saveGame();
+            updateUI();
+        }
+
+        function weightedRandom(weights) {
+            let sum = 0;
+            const rand = Math.random();
+            for (const [rarity, weight] of Object.entries(weights)) {
+                sum += weight;
+                if (rand <= sum) return rarity;
+            }
+            return "Common"; // fallback
+        }
+
+        function shop() {
+            outputEl.innerHTML = "Coming Soon! v1.0";
+        }
+
+        function showInventory() {
+            if (inventory.length === 0) {
+                outputEl.innerHTML = "Your inventory is empty!";
+                return;
+            }
+            
+            const rarityCounts = {};
+            inventory.forEach(item => {
+                const rarity = fishData[item];
+                rarityCounts[rarity] = (rarityCounts[rarity] || 0) + 1;
+            });
+            
+            let inventoryList = inventory.join(", ");
+            let raritySummary = Object.entries(rarityCounts)
+                .map(([rarity, count]) => `${rarity}: ${count}`)
+                .join(" | ");
+            
+            outputEl.innerHTML = `
+                <strong>Inventory:</strong> ${inventoryList}<br>
+                <strong>Rarities:</strong> ${raritySummary}
+            `;
+        }
+
+        // Save/Load System
+        function saveGame() {
+            localStorage.setItem('fishingGameSave', JSON.stringify({
+                inventory: inventory,
+                money: money
+            }));
+        }
+
+        function loadGame() {
+            const saveData = localStorage.getItem('fishingGameSave');
+            if (saveData) {
+                const { inventory: savedInv, money: savedMoney } = JSON.parse(saveData);
+                inventory = savedInv || [];
+                money = savedMoney || 100;
+            }
+        }
+
+        function resetGame() {
+            if (confirm("Are you sure you want to reset your game?")) {
+                inventory = [];
+                money = 100;
+                saveGame();
+                updateUI();
+                outputEl.innerHTML = "Game reset!";
+            }
+        }
+
+        function updateUI() {
+            moneyEl.textContent = money;
+            inventoryCountEl.textContent = inventory.length;
+        }
+    </script>
+</body>
+</html>
