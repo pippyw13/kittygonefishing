@@ -49,6 +49,7 @@
         <button id="shop-btn">Shop</button>
         <button id="inventory-btn">Inventory</button>
         <button id="reset-btn">Reset Game</button>
+        <button id="sell-btn">Sell Inventory</button>
     </div>
 
     <script>
@@ -200,6 +201,7 @@
             document.getElementById("shop-btn").addEventListener("click", shop);
             document.getElementById("inventory-btn").addEventListener("click", showInventory);
             document.getElementById("reset-btn").addEventListener("click", resetGame);
+            document.getElementById("sell-btn").addEventListener("click", sellInventory);
         });
 
         // Core Game Functions
@@ -226,7 +228,9 @@
         }
 
         function shop() {
-            outputEl.innerHTML = "Coming Soon! v1.0";
+            outputEl.innerHTML = "Full shop coming soon!";
+
+
         }
 
         function showInventory() {
@@ -268,6 +272,38 @@
             `;
         }
 
+        function sellInventory() {
+            if (inventory.length === 0) {
+                outputEl.innerHTML = "Your inventory is empty! Nothing to sell.";
+                return;
+            }
+
+            // Calculate total value based on rarity
+            const rarityValues = {
+                "common": 5,
+                "uncommon": 10,
+                "rare": 20,
+                "legendary": 50,
+                "exotic": 100,
+                "lucky": 500,
+                "no": 1
+            };
+
+            let totalValue = 0;
+            inventory.forEach(item => {
+                const rarity = fishData[item];
+                totalValue += rarityValues[rarity] || 0; // Default to 0 if rarity is undefined
+            });
+
+            // Add money and clear inventory
+            money += totalValue;
+            inventory = [];
+            saveGame();
+            updateUI();
+
+            outputEl.innerHTML = `💰 You sold all your fish for $${totalValue}!`;
+        }
+
         // Save/Load System
         function saveGame() {
             localStorage.setItem('fishingGameSave', JSON.stringify({
@@ -302,3 +338,5 @@
     </script>
 </body>
 </html>
+
+         
