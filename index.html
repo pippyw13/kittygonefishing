@@ -241,9 +241,14 @@
                 return counts;
             }, {});
 
-            // Format inventory list with counts
+            // Format inventory list with counts and rarities
             const inventoryList = Object.entries(itemCounts)
-                .map(([item, count]) => count > 1 ? `${item} (x${count})` : item)
+                .map(([item, count]) => {
+                    const rarity = fishData[item];
+                    return count > 1
+                        ? `${item} (x${count}, ${rarity})`
+                        : `${item} (${rarity})`;
+                })
                 .join(", ");
 
             // Count rarities
